@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>APE 3 · Sistemas Distribuidos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&family=Orbitron:wght@700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #e4e4e4;
+            --bg2: #0d1117;
+            --panel: #111820;
+            --border: #1e2d3d;
+            --accent: #00d4ff;
+            --accent2: #ff6b35;
+            --accent3: #39ff14;
+            --accent4: #bf5af2;
+            --text: #c9d1d9;
+            --text-dim: #4a6072;
+            --success: #39ff14;
+            --error: #ff453a;
+            --warn: #ffd60a;
+            --font-mono: 'Share Tech Mono', monospace;
+            --font-display: 'Orbitron', monospace;
+            --font-body: 'Rajdhani', sans-serif;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Header */
+        header {
+            position: relative;
+            z-index: 10;
+            padding: 2rem 3rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(0, 212, 255, 0.05) 0%, transparent 100%);
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .header-badge {
+            background: var(--accent);
+            color: var(--bg);
+            font-family: var(--font-display);
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.3rem 0.7rem;
+            letter-spacing: 0.1em;
+            clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+        }
+
+        .header-title {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 0.05em;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .header-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-top: 0.2rem;
+        }
+
+        .header-status {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-dim);
+            animation: pulse 2s infinite;
+        }
+
+        .dot.online {
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0.4
+            }
+        }
+
+        /* Nav tabs */
+        nav {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            gap: 0;
+            padding: 0 3rem;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            padding: 1rem 1.8rem;
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .nav-tab:hover {
+            color: var(--text);
+        }
+
+        .nav-tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .nav-tab .tab-num {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--accent2);
+            margin-right: 0.4rem;
+        }
+
+        /* Main layout */
+        main {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 3rem;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        /* Section header */
+        .section-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.05em;
+        }
+
+        .section-desc {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-top: 0.4rem;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        /* Controls panel */
+        .controls {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+            margin-bottom: 1.5rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .control-group label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--accent);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .control-group input,
+        .control-group select {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            padding: 0.5rem 0.8rem;
+            width: 130px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .control-group input:focus,
+        .control-group select:focus {
+            border-color: var(--accent);
+        }
+
+        .btn-run {
+            background: linear-gradient(135deg, var(--accent), #0099bb);
+            color: var(--bg);
+            border: none;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            padding: 0.65rem 2rem;
+            cursor: pointer;
+            clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        .btn-run:hover {
+            filter: brightness(1.2);
+            transform: translateY(-1px);
+        }
+
+        .btn-run:active {
+            transform: translateY(0);
+        }
+
+        .btn-run:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-compare {
+            background: linear-gradient(135deg, var(--accent2), #cc4400);
+            color: #fff;
+            border: none;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            padding: 0.65rem 1.5rem;
+            cursor: pointer;
+            clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        .btn-compare:hover {
+            filter: brightness(1.2);
+        }
+
+        .btn-compare:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Cards row */
+        .cards-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            padding: 1.2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--card-accent, var(--accent));
+        }
+
+        .stat-label {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .stat-value.good {
+            color: var(--success);
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.4);
+        }
+
+        .stat-value.bad {
+            color: var(--error);
+            text-shadow: 0 0 10px rgba(255, 69, 58, 0.4);
+        }
+
+        .stat-value.warn {
+            color: var(--warn);
+        }
+
+        .stat-sub {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: 0.3rem;
+        }
+
+        /* Conclusion banner */
+        .conclusion-banner {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent3);
+            padding: 1rem 1.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--accent3);
+            margin-bottom: 1.5rem;
+        }
+
+        .conclusion-banner.error {
+            border-left-color: var(--error);
+            color: var(--error);
+        }
+
+        /* Log panel */
+        .log-panel {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            height: 380px;
+            overflow-y: auto;
+        }
+
+        .log-header {
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 0.6rem 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: sticky;
+            top: 0;
+        }
+
+        .log-entry {
+            display: grid;
+            grid-template-columns: 60px 160px 1fr;
+            gap: 0.5rem;
+            padding: 0.4rem 1rem;
+            border-bottom: 1px solid rgba(30, 45, 61, 0.5);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            transition: background 0.1s;
+        }
+
+        .log-entry:hover {
+            background: rgba(0, 212, 255, 0.04);
+        }
+
+        .log-ts {
+            color: var(--text-dim);
+        }
+
+        .log-actor {
+            color: var(--accent2);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .log-msg {
+            color: var(--text);
+        }
+
+        .log-msg.fase1 {
+            color: #7ec8e3;
+        }
+
+        .log-msg.fase2 {
+            color: var(--accent3);
+        }
+
+        .log-msg.barrera {
+            color: var(--warn);
+        }
+
+        .log-msg.broadcast {
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .log-msg.write {
+            color: var(--accent4);
+        }
+
+        .log-msg.read {
+            color: #7ec8e3;
+        }
+
+        .log-msg.mutex {
+            color: var(--accent);
+        }
+
+        .log-msg.libre {
+            color: var(--success);
+        }
+
+        /* Buffer visualization */
+        .buffer-vis {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            padding: 1rem;
+        }
+
+        .buffer-slot {
+            width: 60px;
+            height: 60px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            transition: all 0.3s;
+            background: var(--panel);
+        }
+
+        .buffer-slot.filled {
+            border-color: var(--accent);
+            background: rgba(0, 212, 255, 0.08);
+            box-shadow: 0 0 8px rgba(0, 212, 255, 0.2);
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 3rem;
+            font-family: var(--font-mono);
+            color: var(--accent);
+            font-size: 0.85rem;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            color: var(--text-dim);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .placeholder-icon {
+            font-size: 2rem;
+            opacity: 0.3;
+        }
+
+        /* Two column layout */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            header {
+                padding: 1.5rem;
+            }
+
+            nav {
+                padding: 0 1rem;
+            }
+
+            main {
+                padding: 1.5rem;
+            }
+
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg2);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 2px;
+        }
+
+        /* Toggle switch for mutex comparison */
+        .toggle-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+        }
+
+        .badge {
+            padding: 0.2rem 0.6rem;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .badge-ok {
+            background: rgba(57, 255, 20, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(57, 255, 20, 0.3);
+        }
+
+        .badge-err {
+            background: rgba(255, 69, 58, 0.15);
+            color: var(--error);
+            border: 1px solid rgba(255, 69, 58, 0.3);
+        }
+
+        .badge-warn {
+            background: rgba(255, 214, 10, 0.15);
+            color: var(--warn);
+            border: 1px solid rgba(255, 214, 10, 0.3);
+        }
+
+        .tablon-list {
+            list-style: none;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .tablon-list li {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text);
+            padding: 0.4rem 0.8rem;
+            background: rgba(191, 90, 242, 0.07);
+            border-left: 2px solid var(--accent4);
+        }
+
+        .compare-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .compare-panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            padding: 1rem;
+        }
+
+        .compare-panel h4 {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .compare-panel.mutex-on h4 {
+            color: var(--success);
+        }
+
+        .compare-panel.mutex-off h4 {
+            color: var(--error);
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="header-badge">APE · 003</div>
+        <div>
+            <div class="header-title">SISTEMAS DISTRIBUIDOS</div>
+            <div class="header-subtitle">Sincronización de Hilos · UNL · 6to Ciclo</div>
+        </div>
+        <div class="header-status">
+            <div class="dot online" id="statusDot"></div>
+            <span id="statusText">CONECTANDO...</span>
+        </div>
+    </header>
+
+    <nav>
+        <button class="nav-tab active" onclick="setTab(0)"><span class="tab-num">EJ1</span> Mutex</button>
+        <button class="nav-tab" onclick="setTab(1)"><span class="tab-num">EJ2</span> Semáforos</button>
+        <button class="nav-tab" onclick="setTab(2)"><span class="tab-num">EJ3</span> Prod-Cons</button>
+        <button class="nav-tab" onclick="setTab(3)"><span class="tab-num">EJ4</span> Lect-Escr</button>
+        <button class="nav-tab" onclick="setTab(4)"><span class="tab-num">EJ5</span> Barrera</button>
+    </nav>
+
+    <main>
+
+        <!-- EJ1: MUTEX -->
+        <div class="section active" id="sec0">
+            <div class="section-header">
+                <div>
+                    <div class="section-title">EJ1 · El Dilema de la Taquilla</div>
+                    <div class="section-desc">Exclusión Mutua con Mutex. N hilos venden M boletos cada uno. El cerrojo
+                        garantiza atomicidad y evita condiciones de carrera.</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>N° Hilos</label>
+                    <input type="number" id="ej1_hilos" value="5" min="1" max="10" />
+                </div>
+                <div class="control-group">
+                    <label>Ventas/Hilo</label>
+                    <input type="number" id="ej1_ventas" value="200" min="10" max="500" />
+                </div>
+                <button class="btn-run" onclick="runEj1(true)" id="btnEj1">▶ CON MUTEX</button>
+                <button class="btn-compare" onclick="runEj1(false)" id="btnEj1b">⚠ SIN MUTEX</button>
+            </div>
+
+            <div id="ej1_result">
+                <div class="placeholder">
+                    <div class="placeholder-icon">🔒</div>Presiona un botón para ejecutar la simulación
+                </div>
+            </div>
+        </div>
+
+        <!-- EJ2: SEMÁFOROS -->
+        <div class="section" id="sec1">
+            <div class="section-header">
+                <div>
+                    <div class="section-title">EJ2 · El Gimnasio</div>
+                    <div class="section-desc">Semáforo de Conteo. Controla que no más de N atletas usen las máquinas
+                        simultáneamente. El semáforo se decrementa al entrar y se incrementa al salir.</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>Máquinas</label>
+                    <input type="number" id="ej2_maquinas" value="3" min="1" max="10" />
+                </div>
+                <div class="control-group">
+                    <label>Atletas</label>
+                    <input type="number" id="ej2_atletas" value="8" min="2" max="15" />
+                </div>
+                <button class="btn-run" onclick="runEj2()" id="btnEj2">▶ SIMULAR GIMNASIO</button>
+            </div>
+
+            <div id="ej2_result">
+                <div class="placeholder">
+                    <div class="placeholder-icon">🏋️</div>Presiona el botón para simular el acceso al gimnasio
+                </div>
+            </div>
+        </div>
+
+        <!-- EJ3: PRODUCTOR-CONSUMIDOR -->
+        <div class="section" id="sec2">
+            <div class="section-header">
+                <div>
+                    <div class="section-title">EJ3 · La Vitrina de la Panadería</div>
+                    <div class="section-desc">Productor-Consumidor con buffer limitado. Semáforo espacios_vacíos +
+                        semáforo panes_listos + mutex para acceso a la vitrina (buffer circular).</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>Capacidad Vitrina</label>
+                    <input type="number" id="ej3_cap" value="5" min="2" max="10" />
+                </div>
+                <div class="control-group">
+                    <label>Panes a Hornear</label>
+                    <input type="number" id="ej3_panes" value="10" min="5" max="20" />
+                </div>
+                <div class="control-group">
+                    <label>N° Clientes</label>
+                    <input type="number" id="ej3_clientes" value="3" min="1" max="5" />
+                </div>
+                <button class="btn-run" onclick="runEj3()" id="btnEj3">▶ ABRIR PANADERÍA</button>
+            </div>
+
+            <div id="ej3_result">
+                <div class="placeholder">
+                    <div class="placeholder-icon">🥖</div>Presiona el botón para simular la panadería
+                </div>
+            </div>
+        </div>
+
+        <!-- EJ4: LECTORES-ESCRITORES -->
+        <div class="section" id="sec3">
+            <div class="section-header">
+                <div>
+                    <div class="section-title">EJ4 · El Tablón de Notas</div>
+                    <div class="section-desc">Lectores-Escritores con prioridad a lectores. Múltiples lectores
+                        concurrentes; el escritor tiene acceso exclusivo. El primer lector cierra la puerta, el último
+                        la abre.</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>Lectores</label>
+                    <input type="number" id="ej4_lectores" value="5" min="1" max="8" />
+                </div>
+                <div class="control-group">
+                    <label>Escritores</label>
+                    <input type="number" id="ej4_escritores" value="2" min="1" max="4" />
+                </div>
+                <div class="control-group">
+                    <label>Iteraciones</label>
+                    <input type="number" id="ej4_iter" value="3" min="1" max="5" />
+                </div>
+                <button class="btn-run" onclick="runEj4()" id="btnEj4">▶ SIMULAR TABLÓN</button>
+            </div>
+
+            <div id="ej4_result">
+                <div class="placeholder">
+                    <div class="placeholder-icon">📋</div>Presiona el botón para simular el tablón de notas
+                </div>
+            </div>
+        </div>
+
+        <!-- EJ5: BARRERA -->
+        <div class="section" id="sec4">
+            <div class="section-header">
+                <div>
+                    <div class="section-title">EJ5 · El Punto de Encuentro</div>
+                    <div class="section-desc">Barrera de Sincronización. Todos los hilos deben completar la Fase 1 antes
+                        de que cualquiera inicie la Fase 2. Implementado con mutex + variable de condición + broadcast.
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>N° Hilos</label>
+                    <input type="number" id="ej5_hilos" value="5" min="2" max="10" />
+                </div>
+                <button class="btn-run" onclick="runEj5()" id="btnEj5">▶ EJECUTAR BARRERA</button>
+            </div>
+
+            <div id="ej5_result">
+                <div class="placeholder">
+                    <div class="placeholder-icon">🚧</div>Presiona el botón para simular la barrera de sincronización
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const API = 'http://localhost:5000';
+        let currentTab = 0;
+
+        // ── Tab navigation ──────────────────────────────────────────────
+        function setTab(i) {
+            document.querySelectorAll('.section').forEach((s, idx) => s.classList.toggle('active', idx === i));
+            document.querySelectorAll('.nav-tab').forEach((t, idx) => t.classList.toggle('active', idx === i));
+            currentTab = i;
+        }
+
+        // ── Backend health check ─────────────────────────────────────────
+        async function checkBackend() {
+            try {
+                await fetch(`${API}/`);
+                document.getElementById('statusDot').className = 'dot online';
+                document.getElementById('statusText').textContent = 'BACKEND ONLINE · :5000';
+            } catch {
+                document.getElementById('statusDot').className = 'dot';
+                document.getElementById('statusDot').style.background = '#ff453a';
+                document.getElementById('statusText').textContent = 'BACKEND OFFLINE';
+            }
+        }
+        checkBackend();
+        setInterval(checkBackend, 10000);
+
+        // ── Helpers ──────────────────────────────────────────────────────
+        function setLoading(container) {
+            document.getElementById(container).innerHTML = `
+    <div class="loading"><div class="spinner"></div>Ejecutando simulación...</div>`;
+        }
+
+        function disableBtn(id) {
+            const b = document.getElementById(id);
+            if (b) { b.disabled = true; b.textContent = '⏳ EJECUTANDO...'; }
+        }
+
+        function enableBtn(id, text) {
+            const b = document.getElementById(id);
+            if (b) { b.disabled = false; b.textContent = text; }
+        }
+
+        function statCard(label, value, sub = '', style = '') {
+            return `<div class="stat-card" style="--card-accent:${style || 'var(--accent)'}">
+    <div class="stat-label">${label}</div>
+    <div class="stat-value">${value}</div>
+    ${sub ? `<div class="stat-sub">${sub}</div>` : ''}
+  </div>`;
+        }
+
+        function logEntry(ts, actor, msg, cls = '') {
+            return `<div class="log-entry">
+    <span class="log-ts">${ts}</span>
+    <span class="log-actor">${actor}</span>
+    <span class="log-msg ${cls}">${msg}</span>
+  </div>`;
+        }
+
+        // ── EJ1: MUTEX ───────────────────────────────────────────────────
+        async function runEj1(usarMutex) {
+            const n = document.getElementById('ej1_hilos').value;
+            const m = document.getElementById('ej1_ventas').value;
+            const btnId = usarMutex ? 'btnEj1' : 'btnEj1b';
+            disableBtn(btnId);
+            setLoading('ej1_result');
+
+            try {
+                const res = await fetch(`${API}/ej1/mutex?n_hilos=${n}&m_ventas=${m}&usar_mutex=${usarMutex}`);
+                const d = await res.json();
+
+                const ok = d.correcto;
+                const col = ok ? 'var(--success)' : 'var(--error)';
+
+                let html = `<div class="cards-row">
+      ${statCard('BOLETOS VENDIDOS', d.resultado_final.toLocaleString(), `Esperado: ${d.esperado.toLocaleString()}`, col)}
+      ${statCard('HILOS', d.n_hilos, 'concurrentes')}
+      ${statCard('VENTAS/HILO', d.m_ventas)}
+      ${statCard('DURACIÓN', d.duracion_segundos + 's', 'tiempo total')}
+      ${statCard('RESULTADO', ok ? '✅ CORRECTO' : '❌ CARRERA', '', col)}
+    </div>
+    <div class="conclusion-banner ${ok ? '' : 'error'}">${d.conclusion}</div>
+    <div class="log-panel">
+      <div class="log-header">▸ REGISTRO DE OPERACIONES (muestra)</div>
+      ${d.logs.map(l => logEntry(l.operacion, `Hilo ${l.hilo}`, `Boletos: ${l.valor}`, 'mutex')).join('')}
+    </div>`;
+
+                document.getElementById('ej1_result').innerHTML = html;
+            } catch (e) {
+                document.getElementById('ej1_result').innerHTML = `<div class="conclusion-banner error">❌ Error conectando al backend: ${e.message}</div>`;
+            }
+            enableBtn('btnEj1', '▶ CON MUTEX');
+            enableBtn('btnEj1b', '⚠ SIN MUTEX');
+        }
+
+        // ── EJ2: SEMÁFORO ────────────────────────────────────────────────
+        async function runEj2() {
+            disableBtn('btnEj2');
+            setLoading('ej2_result');
+            const m = document.getElementById('ej2_maquinas').value;
+            const a = document.getElementById('ej2_atletas').value;
+
+            try {
+                const res = await fetch(`${API}/ej2/semaforo?n_maquinas=${m}&n_atletas=${a}`);
+                const d = await res.json();
+                const ok = d.limite_correcto;
+
+                let html = `<div class="cards-row">
+      ${statCard('MÁQUINAS', d.n_maquinas, 'disponibles', 'var(--accent)')}
+      ${statCard('ATLETAS', d.n_atletas, 'hilos')}
+      ${statCard('MÁX. SIMULTÁNEO', d.max_simultaneos_registrado, `límite: ${d.n_maquinas}`, ok ? 'var(--success)' : 'var(--error)')}
+      ${statCard('DURACIÓN', d.duracion_segundos + 's')}
+      ${statCard('SEMÁFORO', ok ? '✅ OK' : '❌ FALLÓ', '', ok ? 'var(--success)' : 'var(--error)')}
+    </div>
+    <div class="conclusion-banner ${ok ? '' : 'error'}">${d.conclusion}</div>
+    <div class="log-panel">
+      <div class="log-header">▸ ACCESO AL GIMNASIO · EVENTOS</div>
+      ${d.logs.map(l => {
+                    const cls = l.evento.includes('Usando') ? 'barrera' : l.evento.includes('liberada') ? 'libre' : '';
+                    const simul = l.usando_simultaneamente ? ` [Simultáneos: ${l.usando_simultaneamente}/${d.n_maquinas}]` : '';
+                    return logEntry(l.timestamp, `Atleta ${l.atleta}`, l.evento + simul, cls);
+                }).join('')}
+    </div>`;
+
+                document.getElementById('ej2_result').innerHTML = html;
+            } catch (e) {
+                document.getElementById('ej2_result').innerHTML = `<div class="conclusion-banner error">❌ Error: ${e.message}</div>`;
+            }
+            enableBtn('btnEj2', '▶ SIMULAR GIMNASIO');
+        }
+
+        // ── EJ3: PRODUCTOR-CONSUMIDOR ────────────────────────────────────
+        async function runEj3() {
+            disableBtn('btnEj3');
+            setLoading('ej3_result');
+            const cap = document.getElementById('ej3_cap').value;
+            const panes = document.getElementById('ej3_panes').value;
+            const cli = document.getElementById('ej3_clientes').value;
+
+            try {
+                const res = await fetch(`${API}/ej3/panaderia?capacidad=${cap}&n_panes=${panes}&n_clientes=${cli}`);
+                const d = await res.json();
+                const ok = d.correcto;
+
+                let html = `<div class="cards-row">
+      ${statCard('PRODUCIDOS', d.panes_producidos, `objetivo: ${d.n_panes_objetivo}`, 'var(--accent2)')}
+      ${statCard('CONSUMIDOS', d.panes_consumidos, 'por clientes', ok ? 'var(--success)' : 'var(--error)')}
+      ${statCard('VITRINA CAP.', d.capacidad_vitrina, 'buffer circular')}
+      ${statCard('CLIENTES', d.n_clientes)}
+      ${statCard('ESTADO', ok ? '✅ COMPLETO' : '⚠ INCOMPLETO', '', ok ? 'var(--success)' : 'var(--error)')}
+    </div>
+    <div class="conclusion-banner ${ok ? '' : 'error'}">${d.conclusion}</div>
+    <div class="log-panel">
+      <div class="log-header">▸ OPERACIONES EN LA VITRINA [🟩 lleno · ⬜ vacío]</div>
+      ${d.logs.map(l => {
+                    const slots = Array.from({ length: d.capacidad_vitrina }, (_, i) => i < l.ocupacion ? '🟩' : '⬜').join('');
+                    const cls = l.actor.includes('Panadero') ? 'fase1' : 'fase2';
+                    return logEntry(l.timestamp, l.actor, `${l.accion} │ ${slots} (${l.ocupacion}/${d.capacidad_vitrina})`, cls);
+                }).join('')}
+    </div>`;
+
+                document.getElementById('ej3_result').innerHTML = html;
+            } catch (e) {
+                document.getElementById('ej3_result').innerHTML = `<div class="conclusion-banner error">❌ Error: ${e.message}</div>`;
+            }
+            enableBtn('btnEj3', '▶ ABRIR PANADERÍA');
+        }
+
+        // ── EJ4: LECTORES-ESCRITORES ─────────────────────────────────────
+        async function runEj4() {
+            disableBtn('btnEj4');
+            setLoading('ej4_result');
+            const l = document.getElementById('ej4_lectores').value;
+            const e = document.getElementById('ej4_escritores').value;
+            const i = document.getElementById('ej4_iter').value;
+
+            try {
+                const res = await fetch(`${API}/ej4/lectores_escritores?n_lectores=${l}&n_escritores=${e}&iteraciones=${i}`);
+                const d = await res.json();
+
+                let html = `<div class="cards-row">
+      ${statCard('LECTURAS', d.total_lecturas, 'concurrentes ok', 'var(--accent)')}
+      ${statCard('ESCRITURAS', d.total_escrituras, 'exclusivas ok', 'var(--accent4)')}
+      ${statCard('LECTORES', d.n_lectores)}
+      ${statCard('ESCRITORES', d.n_escritores)}
+      ${statCard('DURACIÓN', d.duracion_segundos + 's')}
+    </div>
+    <div class="conclusion-banner">${d.conclusion}</div>
+    <div class="two-col">
+      <div class="log-panel">
+        <div class="log-header">▸ REGISTRO DE ACCESOS</div>
+        ${d.logs.map(l => {
+                    const cls = l.actor.includes('Escritor') ? 'write' : l.accion.includes('INICIO') ? 'read' : l.accion.includes('FIN LECTURA') ? 'libre' : '';
+                    return logEntry(l.timestamp, l.actor, l.accion + (l.lectores_activos !== undefined ? ` [readers:${l.lectores_activos}]` : ''), cls);
+                }).join('')}
+      </div>
+      <div class="log-panel">
+        <div class="log-header">▸ TABLÓN FINAL · ${d.tablon_final.length} ENTRADAS</div>
+        <ul class="tablon-list">
+          ${d.tablon_final.map(n => `<li>${n}</li>`).join('')}
+        </ul>
+      </div>
+    </div>`;
+
+                document.getElementById('ej4_result').innerHTML = html;
+            } catch (e) {
+                document.getElementById('ej4_result').innerHTML = `<div class="conclusion-banner error">❌ Error: ${e.message}</div>`;
+            }
+            enableBtn('btnEj4', '▶ SIMULAR TABLÓN');
+        }
+
+        // ── EJ5: BARRERA ─────────────────────────────────────────────────
+        async function runEj5() {
+            disableBtn('btnEj5');
+            setLoading('ej5_result');
+            const n = document.getElementById('ej5_hilos').value;
+
+            try {
+                const res = await fetch(`${API}/ej5/barrera?n_hilos=${n}`);
+                const d = await res.json();
+                const ok = d.barrera_correcta;
+
+                const faseColors = {
+                    'FASE_1': 'fase1', 'FASE_1_FIN': 'fase1',
+                    'BARRERA': 'barrera', 'BROADCAST': 'broadcast',
+                    'FASE_2': 'fase2', 'FASE_2_FIN': 'fase2'
+                };
+
+                let html = `<div class="cards-row">
+      ${statCard('HILOS', d.n_hilos, 'procesos')}
+      ${statCard('DURACIÓN', d.duracion_segundos + 's')}
+      ${statCard('BARRERA', ok ? '✅ CORRECTA' : '❌ FALLÓ', 'ningún hilo saltó', ok ? 'var(--success)' : 'var(--error)')}
+    </div>
+    <div class="conclusion-banner ${ok ? '' : 'error'}">${d.conclusion}</div>
+    <div class="log-panel">
+      <div class="log-header">▸ FASES DE EJECUCIÓN · [FASE1 → BARRERA → FASE2]</div>
+      ${d.logs.map(l => logEntry(
+                    l.timestamp,
+                    `Hilo ${l.hilo}`,
+                    l.evento,
+                    faseColors[l.fase] || ''
+                )).join('')}
+    </div>`;
+
+                document.getElementById('ej5_result').innerHTML = html;
+            } catch (e) {
+                document.getElementById('ej5_result').innerHTML = `<div class="conclusion-banner error">❌ Error: ${e.message}</div>`;
+            }
+            enableBtn('btnEj5', '▶ EJECUTAR BARRERA');
+        }
+    </script>
+</body>
+
+</html>
